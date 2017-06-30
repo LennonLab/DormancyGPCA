@@ -1,0 +1,122 @@
+---
+title: "RpfCommunity-AbundanceDiversity"
+author: "Venus Kuo"
+date: "June 8th, 2017"
+output: pdf_document
+---
+
+## 1) Questions
+
+We test whether a concentration gradent of Rpf can affect the diversity and abundance of soil microbial community on agar plates.
+
+## 2) Experiment methods
+
+Soil was extracted from Dunn woods over the course of months, treated to a gradient of Rpf concentrations (umol/L) for 4-5 days before vortexed in pyrophosphate solution and spread plated on R2A-no yeast plates. Colony forming units (CFU) and distinct morphological (unique) colony were counted by eye on plate counter. 
+
+## 3) Set working environment and load packages
+
+```{r setup}
+# Set working directory #
+rm(list = ls())
+getwd()
+setwd("C:/Users/Venus/Github/RpfCommunity/data/")
+
+# Require or install packages #
+package.list <- c('vegan', 'ggplot2', 'gplots', 'psych', 'corrplot', 'BiodiversityR', 'RColorBrewer') 
+for (package in package.list) {
+  if (!require(package, character.only=T, quietly=T)) { 
+    install.packages(package)
+    library(package, character.only=T)
+} }
+```
+
+## 4) Load and describe data set
+
+cfu.csv : An excel sheet containing R2 agar plate information as follows: Soil collection date, soil plate date, plate count date, date of recombiant Rpf production (See Lennon et al 2017??), concentration of stock Rpf protein (mg/mL), soil (g), Rpf treatment concentration (umol/L), rep number, days plates incubated, colonies counted, unique colony morphologies, IMG file number (pictures located on IU Box under "Rpf-Dose Response" and "Soil Community Plate Pictures"), serial dilution used for plates, volume used to inoculate plate, CFU/mL, (CFU/mL)/soil (g), Log10((CFU/mL)/soil(g)), Unique colonies/ soil (g).  
+
+```{r}
+setwd("C:/Users/Venus/Github/RpfCommunity/data/")
+# Load cfu.csv dataset #
+cfu <- read.csv("soil_cfu.csv",  header=T)
+```
+
+## 5) Color code dates of soil collection
+
+See cfu.xlsx or cfu.csv for soil collection dates
+
+```{r}
+#Create a custom color scale
+#myColors <- brewer.pal(5,"Set1")  # 5 is the number of sampling time points #
+#names(myColors) <- levels(cfu$Collection)
+#colScale <- scale_colour_manual(name = "Sampling Time Points",values = myColors)
+#One plot with all the data
+#p <- ggplot(dat,aes(x,y,colour = grp)) + geom_point() # colour = Sampling Time Points will be in aes below to label levels #
+cfu <- cfu[1:30, ]
+```
+
+## 5) Visualization of hump-shaped relationship by scatter plot 
+
+```{r}
+# Colony forming units/ soil (g) with increasing Rpf concentration to soil #
+cfu.point <- ggplot(cfu, aes(x=Concentration, y = StdCFU)) + 
+  geom_point() #+   # Scatter plot #
+  #colScale  # To add the colors for each time point #
+  
+cfu.plot <- cfu.point +    # Figure editting #
+  labs(x=expression(paste("Rpf concentrations (",mu,"mol/L)")), 
+       y="(CFU/mL) / Soil (g)") +
+  theme_classic() +
+  theme(axis.text.y=element_text(colour="black", size=15, margin =margin(0,15,0,0)),
+        axis.text.x=element_text(colour="black", size =20, margin =margin(15,0,0,0)),
+        axis.title.y = element_text(colour="black", size=20,  margin = margin(0,25,0,10)),
+        axis.title.x = element_text(colour="black", size=20,  margin=margin(25,0,0,0)),
+        panel.border = element_rect(linetype = "solid", colour = "black", size=3, fill=NA),
+        axis.ticks.length = unit(-0.35, "cm"),
+        axis.ticks = element_line(size = 1.65, colour="black"),
+        legend.title = element_text(size=15),
+        legend.text=element_text(size=15)) +
+  scale_x_continuous(breaks = round(seq(0, 6, by = 1),1)) +
+  annotate("text", x =0.2, y=8005000, label = c("A"), size=12)
+cfu.plot   # Plot #
+
+# Unique colony morphology / soil (g) with increasing Rpf concentration to soil #
+uniq.point <- ggplot(cfu, aes(x=Concentration, y = StdUC)) + 
+  geom_point()  #+ # Scatter plot #
+  #colScale  # To add the colors for each time point #
+
+uniq.plot <- uniq.point +   # Figure Editting # 
+  labs(x=expression(paste("Rpf concentrations (",mu,"mol/L)")), 
+       y="Unique Morphology / Soil (g)") +
+  theme_classic() +
+  theme(axis.text.y=element_text(colour="black", size=15, margin =margin(0,15,0,0)),
+        axis.text.x=element_text(colour="black", size =20, margin =margin(15,0,0,0)),
+        axis.title.y = element_text(colour="black", size=18,  margin = margin(0,25,0,10)),
+        axis.title.x = element_text(colour="black", size=20, margin=margin(25,0,0,0)),
+        panel.border = element_rect(linetype = "solid", colour = "black", size=3, fill=NA),
+        axis.ticks.length = unit(-0.35, "cm"),
+        axis.ticks = element_line(size = 1.65, colour="black"),
+        legend.title = element_text(size=15),
+        legend.text=element_text(size=15)) +
+  scale_x_continuous(breaks = round(seq(0, 6, by = 1),1)) +
+  annotate("text", x =0.1, y=30, label = c("B"), size=12)
+uniq.plot  # Plot #
+```
+
+# Generalized Linear Models # 
+
+```{r}
+# Poisson Regression # 
+# Used when predicting an outcome variable representing counts from a set of continuous predictor variables #
+fit.cfu <- glm(StdCFU~Concentration,data=cfu,family=quasipoisson())
+summary(fit.cfu)
+
+fit.uc <- glm(StdUC~Concentration,data=cfu,family=poisson())
+summary(fit.uc)
+```
+
+
+
+
+
+
+
