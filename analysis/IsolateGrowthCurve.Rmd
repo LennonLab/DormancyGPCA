@@ -1,0 +1,202 @@
+---
+title: "IsolateGrowthCurves"
+author: "Venus Kuo"
+date: "September 11, 2017"
+output: html_document
+---
+
+# 1) Questions
+
+- Does Rpf+ treatment to soil increase the cultivation of Rpf-responders? 
+
+## Methods
+
+I performed 72 hour growth curve assay with Rpf+/Rpf- treatment on 38 soil isolates that appeared on plates Rpf treated plates in the GPCA project but not on the Rpf- control plates. I then extracted the growth curve parameters using the modified gompertz r code from the lennon lab repo and quantified the relative change in growth curve parameters with Rpf treatment.
+
+
+# 2) Set working environment and load packages
+
+```{r setup}
+# Set working directory #
+rm(list = ls())
+getwd()
+setwd("~/../GitHub/DormancyGPCA/data/")
+
+# Require or install packages #
+package.list <- c('vegan', 'ggplot2','plyr') 
+for (package in package.list) {
+  if (!require(package, character.only=T, quietly=T)) { 
+    install.packages(package)
+    library(package, character.only=T)
+} }
+```
+
+
+# 3) Load growth curve parameter data 
+
+Imported growth curve parameter output from Modified Gompertz growth curve code
+
+```{r}
+setwd("~/../GitHub/DormancyGPCA/data/")
+# Import Growth Rate Data 
+#gc <- read.table("isolate.gc.1.txt", sep = "\t", header = TRUE, row.names = 1)
+gc <- read.table("isolate.gc.2.txt", sep="\t", header= TRUE, row.names = 1)
+
+
+# Subset the gc data set
+growth <- subset(gc, select = c("A", "umax", "L", "isolate", "treatment", "rep"))
+
+# Make Isolate factors 
+growth$isolate <- as.factor(growth$isolate)
+```
+
+
+# 4) Visualizing the effects of Rpf treatment on soil isolate growth parameters
+
+```{r}
+# Lag time # 
+# Calculating the mean and sem of replicates of each isolate and treatment group 
+growth.L.sem <- ddply(growth, c("isolate", "treatment"), summarise, 
+                   mean=mean(L), sem=sd(L)/sqrt(length(L)))
+growth.L.sem <- transform(growth.L.sem, lower=mean-sem, upper=mean+sem) 
+# Bargraph of treatment and isolate group 
+growth.L.bar <- ggplot(growth.L.sem, aes(x=isolate, y = mean, fill=treatment)) + 
+  geom_bar(width=0.5, colour="black", position = position_dodge(width = 0.65), stat = "identity", size=1)  
+# Nice Figure
+growth.L.bar + geom_errorbar(aes(ymax=upper, ymin=lower),
+                              position=position_dodge(0.65), data=growth.L.sem, width = 0.2, size = 1) +
+  labs(x="Soil Isolates", y="Lag Time") +
+  scale_fill_manual(values=c("Black", "White")) +
+  theme_classic() +
+  theme(axis.text.y=element_text(colour="black", size=18),
+        axis.text.x=element_text(colour="black", size =18),
+        axis.title=element_text(size=22),
+        axis.title.y = element_text(colour="black",  margin = margin(0,10,0,10)),
+        axis.title.x = element_text(colour="black",margin=margin(5,0,0,0)),
+        panel.border = element_rect(linetype = "solid", colour = "black", size=3, fill=NA),
+        axis.ticks.length = unit(.25, "cm"),
+        axis.ticks = element_line(size = 2),
+        legend.title = element_text(size=18),
+        legend.text=element_text(size=18))
+
+# Maximum growth rate # 
+growth.umax.sem <- ddply(growth, c("isolate", "treatment"), summarise, 
+                   mean=mean(umax), sem=sd(umax)/sqrt(length(umax)))
+growth.umax.sem <- transform(growth.umax.sem, lower=mean-sem, upper=mean+sem) 
+growth.umax.bar <- ggplot(growth.umax.sem, aes(x=isolate, y = mean, fill=treatment)) + 
+  geom_bar(width=0.5, colour="black", position = position_dodge(width = 0.65), stat = "identity", size=1)  
+growth.umax.bar + geom_errorbar(aes(ymax=upper, ymin=lower),
+                              position=position_dodge(0.65), data=growth.umax.sem, width = 0.2, size = 1) +
+  labs(x="Soil Isolates", y="Maximum growth rate") +
+  scale_fill_manual(values=c("Black", "White")) +
+  theme_classic() +
+  theme(axis.text.y=element_text(colour="black", size=18),
+        axis.text.x=element_text(colour="black", size =18),
+        axis.title=element_text(size=22),
+        axis.title.y = element_text(colour="black",  margin = margin(0,10,0,10)),
+        axis.title.x = element_text(colour="black",margin=margin(5,0,0,0)),
+        panel.border = element_rect(linetype = "solid", colour = "black", size=3, fill=NA),
+        axis.ticks.length = unit(.25, "cm"),
+        axis.ticks = element_line(size = 2),
+        legend.title = element_text(size=18),
+        legend.text=element_text(size=18))
+
+# Biomass yeild # 
+growth.A.sem <- ddply(growth, c("isolate", "treatment"), summarise, 
+                   mean=mean(A), sem=sd(A)/sqrt(length(A)))
+growth.A.sem <- transform(growth.A.sem, lower=mean-sem, upper=mean+sem) 
+growth.A.bar <- ggplot(growth.A.sem, aes(x=isolate, y = mean, fill=treatment)) + 
+  geom_bar(width=0.5, colour="black", position = position_dodge(width = 0.65), stat = "identity", size=1)  
+growth.A.bar + geom_errorbar(aes(ymax=upper, ymin=lower),
+                              position=position_dodge(0.65), data=growth.A.sem, width = 0.2, size = 1) +
+  labs(x="Soil Isolates", y="Biomass Yeild (OD600)") +
+  scale_fill_manual(values=c("Black", "White")) +
+  theme_classic() +
+  theme(axis.text.y=element_text(colour="black", size=18),
+        axis.text.x=element_text(colour="black", size =18),
+        axis.title=element_text(size=22),
+        axis.title.y = element_text(colour="black",  margin = margin(0,10,0,10)),
+        axis.title.x = element_text(colour="black",margin=margin(5,0,0,0)),
+        panel.border = element_rect(linetype = "solid", colour = "black", size=3, fill=NA),
+        axis.ticks.length = unit(.25, "cm"),
+        axis.ticks = element_line(size = 2),
+        legend.title = element_text(size=18),
+        legend.text=element_text(size=18))
+```
+
+
+# 5) Statistics
+
+```{r}
+# Maximum growth rate # 
+# Two factor ANOVA # 
+umax.aov <- aov(umax ~ treatment+isolate+treatment*isolate, data=growth)
+summary(umax.aov)
+umax.aov <- aov(umax ~ treatment, data=growth)
+summary(umax.aov)
+TukeyHSD(umax.aov)
+# The interactive effect of treatment and isolate is significant on umax F5,36 = 36.46, p < 0.0001 #
+
+# Lag time to exponential growth # 
+# Two factor ANOVA # 
+L.aov <- aov(L ~ treatment+isolate+treatment*isolate, data=growth)
+summary(L.aov)
+L.aov <- aov(L ~ treatment, data=growth)
+summary(L.aov)
+TukeyHSD(L.aov)
+# The interactive effect of treatment and isolate is significant on lag time F5,36 = 9.226, p < 0.001 #
+
+# Final biomass yeild # 
+# Two factor ANOVA # 
+A.aov <- aov(A ~ treatment+isolate+treatment*isolate, data=growth)
+summary(A.aov)
+A.aov <- aov(A ~ treatment, data=growth)
+summary(A.aov)
+TukeyHSD(A.aov)
+# The interactive effect of treatment and isolate is significant on biomass yeild F5,36 = 4.056, p = 0.005 #
+```
+
+
+# 6) Proportional differences for each isolate between two treatment groups # 
+
+```{r}
+# Make subset of each treatment group
+Rpf <- subset(growth, treatment == "Rpf+")
+control <- subset(growth, treatment == "Rpf-")
+
+# Order the two dataset by isolate and rep number 
+Rpf <- with(Rpf, Rpf[order(isolate,rep),])
+control <- with(control, control[order(isolate,rep),])
+
+# New data frame to input proportional difference with treatment
+m <- matrix(0, ncol = 0, nrow = 22)
+data <- as.data.frame(m)
+
+# Set vectors as growth parameters 
+control.A <- control$A
+Rpf.A <- Rpf$A
+control.umax <- control$umax
+Rpf.umax <- Rpf$umax
+control.L <- control$L
+Rpf.L <- Rpf$L
+
+# Populate data frame with % change with Rpf treatment
+data$A <- ((Rpf.A-control.A)/control.A)*100
+data$L <- ((Rpf.L-control.L)/control.L)*100
+data$umax <- ((Rpf.umax-control.umax)/control.umax)*100
+data$isolate <- Rpf$isolate
+data$rep <- Rpf$rep
+
+# Plot box plot to quickly visualize changes
+boxplot(A ~ isolate, data=data, main="Biomass")
+boxplot(umax ~ isolate, data=data, main="Umax")
+boxplot(L ~ isolate, data=data, main="Lag")
+
+```
+
+
+
+
+
+
+
