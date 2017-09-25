@@ -42,7 +42,6 @@ setwd("~/../GitHub/DormancyGPCA/data/")
 #gc <- read.table("isolate.gc.1.txt", sep = "\t", header = TRUE, row.names = 1)
 gc <- read.table("isolate.gc.2.txt", sep="\t", header= TRUE, row.names = 1)
 
-
 # Subset the gc data set
 growth <- subset(gc, select = c("A", "umax", "L", "isolate", "treatment", "rep"))
 
@@ -169,7 +168,7 @@ Rpf <- with(Rpf, Rpf[order(isolate,rep),])
 control <- with(control, control[order(isolate,rep),])
 
 # New data frame to input proportional difference with treatment
-m <- matrix(0, ncol = 0, nrow = 22)
+m <- matrix(0, ncol = 0, nrow = 24)
 data <- as.data.frame(m)
 
 # Set vectors as growth parameters 

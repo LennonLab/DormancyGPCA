@@ -1,0 +1,13 @@
+Type,Sample,Treatment,Dilution,Rep,Colonies,Morphotypes,Soil
+Soil,Peru,IgG,0.000001,1,130,9,0.504
+Soil,Peru,IgG,0.000001,2,105,11,0.504
+Soil,Peru,IgG,0.000001,3,111,11,0.504
+Soil,Peru,IgG,0.000001,4,84,12,0.504
+Soil,Peru,Rpf-,0.000001,1,52,9,0.516
+Soil,Peru,Rpf-,0.000001,2,56,11,0.516
+Soil,Peru,Rpf-,0.000001,3,57,9,0.516
+Soil,Peru,Rpf-,0.000001,4,57,5,0.516
+Soil,Peru,Rpf+,0.000001,1,68,15,0.509
+Soil,Peru,Rpf+,0.000001,2,107,19,0.509
+Soil,Peru,Rpf+,0.000001,3,81,19,0.509
+Soil,Peru,Rpf+,0.000001,4,81,21,0.509

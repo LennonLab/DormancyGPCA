@@ -1,8 +1,8 @@
 ---
-title: "DormancyGPCA - AbundanceDiversity"
+title: "DormancyGPCA - NegativeControl"
 author: "Venus Kuo"
-date: "June 8th, 2017"
-output: pdf_document
+date: "September 25, 2017"
+output: html_document
 ---
 
 # 1) Questions
@@ -39,7 +39,10 @@ Below, I calulated CFU based on colony counts and dilution factor. I standardize
 ```{r}
 setwd("~/../GitHub/DormancyGPCA/data/")
 # Load cfu.csv dataset #
-cfu <- read.csv("plateCfuMorphotypeData.txt",  header=T)
+cfu <- read.csv("Negativecontrol.txt",  header=T)
+
+# Remove NAs # 
+cfu <- na.omit(cfu)
 
 # Calculating and standardizing CFU # 
 dil.factor <- cfu$Dilution
@@ -52,10 +55,6 @@ cfu$stdcfu.log<- log10(cfu$stdCFU)
 cfu$stdMorph <- (cfu$Morphotypes/soilamount)
 cfu$stdMorph.log <- log10(cfu$stdMorph)
 
-# Natural log transform Rpf concentration # 
-x <- (cfu$RpfConcentration)
-cfu$rpf <- log2(cfu$RpfConcentration + 1)
-
 # Look at the data set # 
 #View(cfu)
 ```
@@ -63,34 +62,22 @@ cfu$rpf <- log2(cfu$RpfConcentration + 1)
 
 # 4) Visualizing CFU and morphology with Rpf treatment
 
-## Color coding each soil sample by color
-
-```{r}
-#Create a custom color scale for each soil sample #
-myColors <- brewer.pal(3,"Set1")  
-
-names(myColors) <- levels(cfu$Sample)
-
-colScale <- scale_colour_manual(name = "Sample",values = myColors)
-```
-
-
-## Visualization of log10(CFU/Soil(g)) scatter plot 
+## Visualization of CFU/Soil(g) bar plot 
 
 ```{r}
 # Average of each treatment by sample # 
-cfu.mean <- ddply(cfu, c("rpf", "Sample"), summarise, 
-                   mean=mean(stdcfu.log), sem=sd(stdcfu.log)/sqrt(length(stdcfu.log)))
+cfu.mean <- ddply(cfu, c("Treatment"), summarise, 
+                   mean=mean(stdCFU), sem=sd(stdCFU)/sqrt(length(stdCFU)))
 cfu.mean <- transform(cfu.mean, lower=mean-sem, upper=mean+sem) 
 
-# Line graph CFU # 
-cfu.line <- ggplot(data=cfu.mean, aes(x=rpf, y=mean, colour=Sample)) + 
-  geom_line()
+# Bar graph CFU # 
+cfu.bar<- ggplot(data = cfu.mean, aes(x=Treatment,y = mean)) + 
+  geom_bar(width=0.5, colour="black", position = position_dodge(width = 0.65), stat = "identity", size=1)  
 
 
-cfu.plot <- cfu.line +    # Figure editting #
-  labs(x=expression(paste("Rpf concentrations, Log(",mu,"mol/L)")), 
-       y="Log10(CFU/Soil(g)") +
+cfu.plot <- cfu.bar +    # Figure editting #
+  labs(x="Treatment groups", 
+       y="CFU/Soil(g)") +
   geom_errorbar(aes(ymax=upper, ymin=lower), data=cfu.mean, width = 0.1, size = 0.5) +
   theme_classic() +
   theme(axis.text.y=element_text(colour="black", size=20, margin =margin(0,15,0,0)),
@@ -101,101 +88,58 @@ cfu.plot <- cfu.line +    # Figure editting #
         axis.ticks.length = unit(-0.35, "cm"),
         axis.ticks = element_line(size = 1.65, colour="black"),
         legend.title = element_text(size=15),
-        legend.text=element_text(size=15)) +
-  scale_x_continuous(breaks = round(seq(0, 6, by = 1),1)) + 
-  geom_point() + 
-  annotate("text", x =0.1, y=9.25, label = c("a"), size=12)
+        legend.text=element_text(size=15))  #+ 
+  #annotate("text", x =0.6, y=9.25, label = c("a"), size=12)
 
 cfu.plot
 ```
 
 
-## Visualization of log10(CFU/Soil(g)) scatter plot 
+## Visualization of Morphotype/Soil(g) bar plot 
 
 ```{r}
-# Unique colony morphology / soil (g) with increasing Rpf concentration to soil #
-uniq.point <- ggplot(cfu, aes(x=rpf, y = stdMorph, colour=Sample)) + 
-  geom_point()  #+ # Scatter plot #
-  #colScale  # To add the colors for each time point #
-
 # Average of each treatment by sample # 
-uniq.mean <- ddply(cfu, c("rpf", "Sample"), summarise, 
+uniq.mean <- ddply(cfu, c("Treatment"), summarise, 
                    mean=mean(stdMorph), sem=sd(stdMorph)/sqrt(length(stdMorph)))
 uniq.mean <- transform(uniq.mean, lower=mean-sem, upper=mean+sem) 
 
-# Line graph CFU # 
-uniq.line <- ggplot(data=uniq.mean, aes(x=rpf, y=mean, colour=Sample)) + 
-  geom_line()
+# Bar graph CFU # 
+uniq.bar <- ggplot(data = uniq.mean, aes(x=Treatment,y = mean)) + 
+  geom_bar(width=0.5, colour="black", position = position_dodge(width = 0.65), stat = "identity", size=1)  
 
 # Polished Figures # 
-uniq.plot <- uniq.line +   # Figure Editting # 
-  labs(x=expression(paste("Rpf concentrations (",mu,"mol/L)")), 
-       y="Log10(Morphotype/Soil(g)") +
+uniq.plot <- uniq.bar +    # Figure editting #
+  labs(x="Treatment groups", 
+       y="Morphotype/Soil(g)") +
   geom_errorbar(aes(ymax=upper, ymin=lower), data=uniq.mean, width = 0.1, size = 0.5) +
   theme_classic() +
   theme(axis.text.y=element_text(colour="black", size=20, margin =margin(0,15,0,0)),
         axis.text.x=element_text(colour="black", size =20, margin =margin(15,0,0,0)),
         axis.title.y = element_text(colour="black", size=20,  margin = margin(0,20,0,10)),
-        axis.title.x = element_text(colour="black", size=20, margin=margin(20,0,0,0)),
+        axis.title.x = element_text(colour="black", size=20,  margin=margin(20,0,0,0)),
         panel.border = element_rect(linetype = "solid", colour = "black", size=3, fill=NA),
         axis.ticks.length = unit(-0.35, "cm"),
         axis.ticks = element_line(size = 1.65, colour="black"),
         legend.title = element_text(size=15),
-        legend.text=element_text(size=15)) +
-  scale_x_continuous(breaks = round(seq(0, 6, by = 1),1)) +
-  geom_point() +
-  annotate("text", x =0.1, y=37, label = c("b"), size=12)
+        legend.text=element_text(size=15)) 
 
 uniq.plot  # Plot #
-
-
 ```
 
 
-## Fitting quadratic curve to data 
+# 5) Does treatment type affect CFU and morphotype counts?
 
 ```{r}
-# Linear model adapted from Ken's code# 
-mod <- lm(stdcfu.log ~ x + I(x^2), data =cfu)
-dat <- data.frame(cbind('rpf' = cfu$rpf, 'cfu' = predict(mod)))
-dat <- dat[order(dat), ]
-dat <- dat[complete.cases(dat), ]
+# Rpf effect on CFU #  
+neg.cfu.aov <- aov(stdCFU ~ Treatment, data=cfu)
+summary(neg.cfu.aov)
+TukeyHSD(neg.cfu.aov)
 
-r2 <- summary(mod)$r.squared
-coefs <- summary(mod)$coefficients
-summary(mod)
-
-# Predictions and intervals # 
-newx <- seq(min(cfu$rpf), max(cfu$rpf), len=83)
-preds <- predict(mod, data.frame(rpf = newx), interval = "confidence")
-
-clr <- 'gray'
-plot.new()
-plot(cfu.mean$rpf, cfu.mean$mean, main=title, 
-  	xlab="Rpf concentration, log2(umol/L)", ylab="CFU",
-  	cex.lab=1.5, cex.main=1.5, pch=19)
-polygon(c(rev(newx), newx), c(rev(preds[ , 3]), preds[ ,2]), col = clr, border = NA)
-lines(dat$rpf, dat$cfu, col="red", lwd=2)
-lines(lowess(cfu$rpf, cfu$stdcfu.log), col="blue", lwd=2)
-points (cfu$rpf, cfu$stdcfu.log, pch=19)
-
+# Rpf effect on morphotype # 
+neg.morp.aov <- aov(stdMorph ~ Treatment, data=cfu)
+summary(neg.morp.aov)
+TukeyHSD(neg.morp.aov)
 ```
-
-
-# Generalized Linear Models # 
-
-```{r}
-# Poisson Regression # 
-# Used when predicting an outcome variable representing counts from a set of continuous predictor variables #
-fit.cfu <- glm(stdCFU~rpf,data=cfu,family=quasipoisson())
-summary(fit.cfu)
-
-fit.uc <- glm(stdMorph~rpf,data=cfu,family=poisson())
-summary(fit.uc)
-```
-
-
-
 
 
 
