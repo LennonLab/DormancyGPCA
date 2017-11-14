@@ -7,11 +7,7 @@ output: html_document
 
 # 1) Questions
 
-- Does Rpf+ treatment to soil increase the cultivation of Rpf-responders? 
-
-## Methods
-
-I performed 72 hour growth curve assay with Rpf+/Rpf- treatment on 38 soil isolates that appeared on plates Rpf treated plates in the GPCA project but not on the Rpf- control plates. I then extracted the growth curve parameters using the modified gompertz r code from the lennon lab repo and quantified the relative change in growth curve parameters with Rpf treatment.
+1. Does Rpf+ treatment to soil increase the cultivation of Rpf-responders? 
 
 
 # 2) Set working environment and load packages
@@ -34,13 +30,17 @@ for (package in package.list) {
 
 # 3) Load growth curve parameter data 
 
+I performed 72 hour growth curve assay with Rpf+/Rpf- treatment on 38 soil isolates that appeared on plates Rpf treated plates in the GPCA project but not on the Rpf- control plates. I then extracted the growth curve parameters using the modified gompertz r code from the lennon lab repo and quantified the relative change in growth curve parameters with Rpf treatment.
+
+isolate.gc.1.txt: 
+
 Imported growth curve parameter output from Modified Gompertz growth curve code
 
 ```{r}
 setwd("~/../GitHub/DormancyGPCA/data/")
 # Import Growth Rate Data 
 #gc <- read.table("isolate.gc.1.txt", sep = "\t", header = TRUE, row.names = 1)
-gc <- read.table("isolate.gc.2.txt", sep="\t", header= TRUE, row.names = 1)
+gc <- read.table("isolate.gc.1.txt", sep="\t", header= TRUE, row.names = 1)
 
 # Subset the gc data set
 growth <- subset(gc, select = c("A", "umax", "L", "isolate", "treatment", "rep"))
@@ -76,7 +76,8 @@ growth.L.bar + geom_errorbar(aes(ymax=upper, ymin=lower),
         axis.ticks.length = unit(.25, "cm"),
         axis.ticks = element_line(size = 2),
         legend.title = element_text(size=18),
-        legend.text=element_text(size=18))
+        legend.text=element_text(size=18)) +
+  annotate("text", x =0.575, y=67, label = c("a"), size=12)
 
 # Maximum growth rate # 
 growth.umax.sem <- ddply(growth, c("isolate", "treatment"), summarise, 
@@ -120,7 +121,8 @@ growth.A.bar + geom_errorbar(aes(ymax=upper, ymin=lower),
         axis.ticks.length = unit(.25, "cm"),
         axis.ticks = element_line(size = 2),
         legend.title = element_text(size=18),
-        legend.text=element_text(size=18))
+        legend.text=element_text(size=18)) +
+  annotate("text", x =0.575, y=.67, label = c("b"), size=12)
 ```
 
 
@@ -187,10 +189,38 @@ data$isolate <- Rpf$isolate
 data$rep <- Rpf$rep
 
 # Plot box plot to quickly visualize changes
-boxplot(A ~ isolate, data=data, main="Biomass")
-boxplot(umax ~ isolate, data=data, main="Umax")
-boxplot(L ~ isolate, data=data, main="Lag")
+plot(A ~ isolate, data=data, main="Biomass")
+plot(umax ~ isolate, data=data, main="Umax")
+plot(L ~ isolate, data=data, main="Lag")
 
+```
+
+
+```{r}
+file <- paste("~/../GitHub/DormancyGPCA/figure/IsolateA.png", sep="")
+png(filename=file, width=5, height=5, units="in", res=600, pointsize=10)
+
+plot.new()
+#par(mfrow=c(1,3), mar = c(5,5,3,1), oma =c(0,0,0,0))
+par(mfrow=c(1, 1), mar = c(5,5,3,1), oma =c(0,0,2,0))
+#title <- paste("Colonies vs Rpf,\n r-square=", round(r2,2))
+plot(A ~ isolate, data=data, 
+  	xlab="Soil Isolate", ylab="Proportional change in biomass yield",
+  	cex.lab =1.5, cex.main=2, cex.axis= 1.5,  lwd=2)
+abline(h=0, lty = 2, lwd = 2)
+box(lwd=2)
+
+#plot(umax ~ isolate, data=data, 
+#  	xlab="Soil Isolate", ylab="Maxmium growth rate % change with Rpf",
+#  	cex.lab=1.5, cex.main=1.5)
+#abline(h=0, lty = 2)
+
+#plot(L ~ isolate, data=data, 
+#  	xlab="Soil Isolate", ylab="Lag time % change with Rpf",
+#  	cex.lab=1.5, cex.main=1.5)
+#abline(h=0, lty = 2)
+
+dev.off()
 ```
 
 

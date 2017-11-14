@@ -7,9 +7,7 @@ output: html_document
 
 # 1) Questions
 
-We test whether a concentration gradent of Rpf can affect the diversity and abundance of soil microbial community on agar plates.
-
-Soil was extracted from Dunn woods over the course of months, treated to a gradient of Rpf concentrations (umol/L) for 3 days before vortexed in pyrophosphate solution and spread plated on R2A plates infused with cycloheximide. Colony forming units (CFU) and distinct morphological (unique) colony were counted by eye on plate counter. 
+1. We test whether Rpf muralytic activity is necessary for inducing Rpf effects on soil bacterial diversity and abundance. 
 
 
 # 2) Set working environment and load packages
@@ -32,9 +30,10 @@ for (package in package.list) {
 
 # 3) Load and describe data set
 
-plateCfuMorphotypeData.txt : A text file containing the sample location, treatment concentration, replicate number, dilution factor, colony counts, and morphology counts. 
+Negativecontrol.txt: 
 
-Below, I calulated CFU based on colony counts and dilution factor. I standardized the CFU and morphotype counts by soil amount (g). CFU was log10 transformed to look at the magnitude of CFU changes with Rpf treatment. The Rpf treatment concentration was natural log transformed due to uneven concentration treatments. 
+Data modification:
+1. 
 
 ```{r}
 setwd("~/../GitHub/DormancyGPCA/data/")
@@ -78,7 +77,7 @@ cfu.bar<- ggplot(data = cfu.mean, aes(x=Treatment,y = mean)) +
 cfu.plot <- cfu.bar +    # Figure editting #
   labs(x="Treatment groups", 
        y="CFU/Soil(g)") +
-  geom_errorbar(aes(ymax=upper, ymin=lower), data=cfu.mean, width = 0.1, size = 0.5) +
+  geom_errorbar(aes(ymax=upper, ymin=lower), data=cfu.mean, width = 0.25, size = 0.75) +
   theme_classic() +
   theme(axis.text.y=element_text(colour="black", size=20, margin =margin(0,15,0,0)),
         axis.text.x=element_text(colour="black", size =20, margin =margin(15,0,0,0)),
@@ -88,8 +87,8 @@ cfu.plot <- cfu.bar +    # Figure editting #
         axis.ticks.length = unit(-0.35, "cm"),
         axis.ticks = element_line(size = 1.65, colour="black"),
         legend.title = element_text(size=15),
-        legend.text=element_text(size=15))  #+ 
-  #annotate("text", x =0.6, y=9.25, label = c("a"), size=12)
+        legend.text=element_text(size=15))  + 
+  annotate("text", x =0.6, y=225000000, label = c("A"), size=12)
 
 cfu.plot
 ```
@@ -109,19 +108,19 @@ uniq.bar <- ggplot(data = uniq.mean, aes(x=Treatment,y = mean)) +
 
 # Polished Figures # 
 uniq.plot <- uniq.bar +    # Figure editting #
-  labs(x="Treatment groups", 
-       y="Morphotype/Soil(g)") +
-  geom_errorbar(aes(ymax=upper, ymin=lower), data=uniq.mean, width = 0.1, size = 0.5) +
+  labs(y="Morphotype/Soil(g)") +
+  geom_errorbar(aes(ymax=upper, ymin=lower), data=uniq.mean, width = 0.25, size = 0.75) +
   theme_classic() +
-  theme(axis.text.y=element_text(colour="black", size=20, margin =margin(0,15,0,0)),
+  theme(axis.title.x=element_blank(),
+        axis.text.y=element_text(colour="black", size=20, margin =margin(0,15,0,0)),
         axis.text.x=element_text(colour="black", size =20, margin =margin(15,0,0,0)),
         axis.title.y = element_text(colour="black", size=20,  margin = margin(0,20,0,10)),
-        axis.title.x = element_text(colour="black", size=20,  margin=margin(20,0,0,0)),
         panel.border = element_rect(linetype = "solid", colour = "black", size=3, fill=NA),
         axis.ticks.length = unit(-0.35, "cm"),
         axis.ticks = element_line(size = 1.65, colour="black"),
         legend.title = element_text(size=15),
-        legend.text=element_text(size=15)) 
+        legend.text=element_text(size=15)) #+ 
+  #annotate("text", x =0.6, y=37, label = c("B"), size=12)
 
 uniq.plot  # Plot #
 ```
