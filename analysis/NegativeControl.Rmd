@@ -1,0 +1,145 @@
+---
+title: "DormancyGPCA - NegativeControl"
+author: "Venus Kuo"
+date: "September 25, 2017"
+output: html_document
+---
+
+# 1) Questions
+
+1. We test whether Rpf muralytic activity is necessary for inducing Rpf effects on soil bacterial diversity and abundance. 
+
+
+# 2) Set working environment and load packages
+
+```{r setup}
+# Set working directory #
+rm(list = ls())
+getwd()
+setwd("~/../GitHub/DormancyGPCA/data/")
+
+# Require or install packages #
+package.list <- c('vegan', 'ggplot2', 'gplots', 'plyr', 'psych', 'corrplot', 'BiodiversityR', 'RColorBrewer') 
+for (package in package.list) {
+  if (!require(package, character.only=T, quietly=T)) { 
+    install.packages(package)
+    library(package, character.only=T)
+} }
+```
+
+
+# 3) Load and describe data set
+
+Negativecontrol.txt: 
+
+Data modification:
+1. 
+
+```{r}
+setwd("~/../GitHub/DormancyGPCA/data/")
+# Load cfu.csv dataset #
+cfu <- read.csv("Negativecontrol.txt",  header=T)
+
+# Remove NAs # 
+cfu <- na.omit(cfu)
+
+# Calculating and standardizing CFU # 
+dil.factor <- cfu$Dilution
+soilamount <- cfu$Soil
+cfu$CFU <- cfu$Colonies/dil.factor
+cfu$stdCFU <- (cfu$CFU)/soilamount
+cfu$stdcfu.log<- log10(cfu$stdCFU) 
+
+# Standardizing morphotype # 
+cfu$stdMorph <- (cfu$Morphotypes/soilamount)
+cfu$stdMorph.log <- log10(cfu$stdMorph)
+
+# Look at the data set # 
+#View(cfu)
+```
+
+
+# 4) Visualizing CFU and morphology with Rpf treatment
+
+## Visualization of CFU/Soil(g) bar plot 
+
+```{r}
+# Average of each treatment by sample # 
+cfu.mean <- ddply(cfu, c("Treatment"), summarise, 
+                   mean=mean(stdCFU), sem=sd(stdCFU)/sqrt(length(stdCFU)))
+cfu.mean <- transform(cfu.mean, lower=mean-sem, upper=mean+sem) 
+
+# Bar graph CFU # 
+cfu.bar<- ggplot(data = cfu.mean, aes(x=Treatment,y = mean)) + 
+  geom_bar(width=0.5, colour="black", position = position_dodge(width = 0.65), stat = "identity", size=1)  
+
+
+cfu.plot <- cfu.bar +    # Figure editting #
+  labs(x="Treatment groups", 
+       y="CFU/Soil(g)") +
+  geom_errorbar(aes(ymax=upper, ymin=lower), data=cfu.mean, width = 0.25, size = 0.75) +
+  theme_classic() +
+  theme(axis.text.y=element_text(colour="black", size=20, margin =margin(0,15,0,0)),
+        axis.text.x=element_text(colour="black", size =20, margin =margin(15,0,0,0)),
+        axis.title.y = element_text(colour="black", size=20,  margin = margin(0,20,0,10)),
+        axis.title.x = element_text(colour="black", size=20,  margin=margin(20,0,0,0)),
+        panel.border = element_rect(linetype = "solid", colour = "black", size=3, fill=NA),
+        axis.ticks.length = unit(-0.35, "cm"),
+        axis.ticks = element_line(size = 1.65, colour="black"),
+        legend.title = element_text(size=15),
+        legend.text=element_text(size=15))  + 
+  annotate("text", x =0.6, y=225000000, label = c("A"), size=12)
+
+cfu.plot
+```
+
+
+## Visualization of Morphotype/Soil(g) bar plot 
+
+```{r}
+# Average of each treatment by sample # 
+uniq.mean <- ddply(cfu, c("Treatment"), summarise, 
+                   mean=mean(stdMorph), sem=sd(stdMorph)/sqrt(length(stdMorph)))
+uniq.mean <- transform(uniq.mean, lower=mean-sem, upper=mean+sem) 
+
+# Bar graph CFU # 
+uniq.bar <- ggplot(data = uniq.mean, aes(x=Treatment,y = mean)) + 
+  geom_bar(width=0.5, colour="black", position = position_dodge(width = 0.65), stat = "identity", size=1)  
+
+# Polished Figures # 
+uniq.plot <- uniq.bar +    # Figure editting #
+  labs(y="Morphotype/Soil(g)") +
+  geom_errorbar(aes(ymax=upper, ymin=lower), data=uniq.mean, width = 0.25, size = 0.75) +
+  theme_classic() +
+  theme(axis.title.x=element_blank(),
+        axis.text.y=element_text(colour="black", size=20, margin =margin(0,15,0,0)),
+        axis.text.x=element_text(colour="black", size =20, margin =margin(15,0,0,0)),
+        axis.title.y = element_text(colour="black", size=20,  margin = margin(0,20,0,10)),
+        panel.border = element_rect(linetype = "solid", colour = "black", size=3, fill=NA),
+        axis.ticks.length = unit(-0.35, "cm"),
+        axis.ticks = element_line(size = 1.65, colour="black"),
+        legend.title = element_text(size=15),
+        legend.text=element_text(size=15)) #+ 
+  #annotate("text", x =0.6, y=37, label = c("B"), size=12)
+
+uniq.plot  # Plot #
+```
+
+
+# 5) Does treatment type affect CFU and morphotype counts?
+
+```{r}
+# Rpf effect on CFU #  
+neg.cfu.aov <- aov(stdCFU ~ Treatment, data=cfu)
+summary(neg.cfu.aov)
+TukeyHSD(neg.cfu.aov)
+
+# Rpf effect on morphotype # 
+neg.morp.aov <- aov(stdMorph ~ Treatment, data=cfu)
+summary(neg.morp.aov)
+TukeyHSD(neg.morp.aov)
+```
+
+
+
+
