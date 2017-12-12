@@ -98,8 +98,8 @@ cfu.line <- ggplot(data=cfu.mean, aes(x=rpf, y=mean, colour=Sample)) +
 # Edit line graph figure # 
 cfu.plot <- cfu.line +  
     geom_line(size=1.25) +
-  labs(x=expression(paste("Rpf concentrations, Log2(",mu,"mol/L)")), 
-       y="Log10(CFU/Soil (g)") + 
+  labs(x=expression(paste("Rpf concentrations, Log2(",mu,"mol/L))")), 
+       y="Log10(CFU/Soil (g))") + 
   geom_errorbar(aes(ymax=upper, ymin=lower), data=cfu.mean, width = 0.2, size = 0.5) +
   theme_classic() +
   theme(axis.text.y=element_text(colour="black", size=20, margin =margin(0,15,0,0)),
@@ -184,7 +184,7 @@ summary(mod)
 
 title <- paste("Colonies vs Rpf,\n r-square=", round(r2,2))
 plot(cfu$rpf, cfu$stdcfu.log, main=title, 
-  	xlab="Rpf concentration, log2(umol/L)", ylab="CFU",
+  	xlab="Rpf concentration, log2(umol/L)", ylab="Log10(CFU/Soil(g))",
   	cex.lab=1.5, cex.main=1.5, pch=19)
 
 
@@ -201,17 +201,25 @@ lines(lowess(dat2$rpf, dat2$cfu), col="blue", lwd=2) # lowess line (x,y)
 points(cfu$rpf, cfu$cfu, pch=19)
 dev.off()
 
+
+
 ```
 
 
 ## Plot morphotypes 
 ```{r}
+# Perform linear model # 
 linear.model.u <- lm(stdMorph ~rpf, cfu)
 summary(linear.model.u)
 
+# Make quadratic curve fit figure # 
 file <- paste("~/../GitHub/DormancyGPCA/figure/Morphotypes_vs_Rpf.png", sep="")
 png(filename=file, width=5, height=5, units="in", res=600, pointsize=10)
 
+plot.new()
+par(mfrow=c(1, 1), mar = c(5,5,3,1), oma =c(0,0,2,0))
+
+# Quadratic curve #
 mod <- lm(stdMorph ~ rpf + I(rpf^2), data=cfu)
 #mod <- lm(stdMorph ~ rpf, cfu)
 dat2 <- data.frame(cbind('rpf'=cfu$rpf, 'stdMorph'=predict(mod)))
@@ -224,7 +232,7 @@ summary(mod)
 
 title <- paste("Morphotypes vs Rpf,\n r-square=", round(r2,2))
 plot(cfu$rpf, cfu$stdMorph, main=title, 
-  	xlab="Rpf concentration, log2(umol/L)", ylab="Number of morphotypes",
+  	xlab="Rpf concentration, log2(umol/L)", ylab="Morphotypes/Soil (g)",
   	cex.lab=1.5, cex.main=1.5, pch=19)
 
 # predicts + interval
