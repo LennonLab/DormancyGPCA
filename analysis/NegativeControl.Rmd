@@ -87,8 +87,8 @@ cfu.plot <- cfu.bar +    # Figure editting #
         axis.ticks.length = unit(-0.35, "cm"),
         axis.ticks = element_line(size = 1.65, colour="black"),
         legend.title = element_text(size=15),
-        legend.text=element_text(size=15))  + 
-  annotate("text", x =0.6, y=225000000, label = c("A"), size=12)
+        legend.text=element_text(size=15)) # + 
+#  annotate("text", x =0.6, y=225000000, label = c("A"), size=12)
 
 cfu.plot
 ```
