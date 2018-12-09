@@ -112,8 +112,7 @@ cfu.plot <- cfu.line +
         legend.title = element_text(size=15),
         legend.text=element_text(size=15)) +
   scale_x_continuous(breaks = round(seq(0, 6, by = 1),1)) + 
-  geom_point(size = 3) + 
-  annotate("text", x =0.1, y=9.25, label = c("A"), size=12)
+  geom_point(size = 3)
 
 # Plot CFU line graph # 
 cfu.plot
